@@ -1,21 +1,21 @@
 -- Enums
-CREATE TABLE enum_comment_type (
+CREATE TABLE IF NOT EXISTS enum_comment_type (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE enum_packaging (
+CREATE TABLE IF NOT EXISTS enum_packaging (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE enum_set_state (
+CREATE TABLE IF NOT EXISTS enum_set_state (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE
 );
 
 -- Data Tables
-CREATE TABLE comments (
+CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY,
     content TEXT NOT NULL,
     user TEXT NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE comments (
     FOREIGN KEY (type_id) REFERENCES enum_comment_types(id)
 );
 
-CREATE TABLE sets (
+CREATE TABLE IF NOT EXISTS sets (
     serial_number INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
     customer TEXT NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE sets (
     FOREIGN KEY (packaging_id) REFERENCES enum_packaging(id)
 );
 
-CREATE TABLE set_states (
+CREATE TABLE IF NOT EXISTS set_states (
     id INTEGER PRIMARY KEY,
     user TEXT NOT NULL,
     date_time TEXT NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE set_states (
     FOREIGN KEY (comment_id) REFERENCES comments(id)
 );
 
-CREATE TABLE instruments (
+CREATE TABLE IF NOT EXISTS instruments (
     id INTEGER PRIMARY KEY,
     remaining_uses INTEGER,
     set_id INTEGER NOT NULL,
