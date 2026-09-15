@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS set_states (
 
 CREATE TABLE IF NOT EXISTS instruments (
     id INTEGER PRIMARY KEY,
+    name TEXT,
     remaining_uses INTEGER,
     set_id INTEGER NOT NULL,
     comment_id INTEGER,
