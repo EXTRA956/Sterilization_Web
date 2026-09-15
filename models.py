@@ -38,14 +38,14 @@ class Comment:
 	user: str
 	text: str
 	type : EnumCommentType
-	date: datetime = field(default_factory = datetime.now)
+	date_time: datetime = field(default_factory = datetime.now)
 
 @dataclass(frozen = True)
 class SetState:
 	user: str
 	state : EnumSetState
 	comment : Comment | None
-	date: datetime = field(default_factory = datetime.now)
+	date_time: datetime = field(default_factory = datetime.now)
 
 @dataclass
 class Instrument:
