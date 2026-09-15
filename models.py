@@ -36,7 +36,7 @@ class EnumPackaging(Enum):
 @dataclass(frozen = True)
 class Comment:
 	user: str
-	text: str
+	content: str
 	type : EnumCommentType
 	date_time: datetime = field(default_factory = datetime.now)
 
