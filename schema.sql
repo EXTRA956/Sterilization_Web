@@ -18,7 +18,7 @@ CREATE TABLE enum_set_state (
 CREATE TABLE comments (
     id INTEGER PRIMARY KEY,
     content TEXT NOT NULL,
-    author TEXT NOT NULL,
+    user TEXT NOT NULL,
     date_time TEXT NOT NULL,
     type_id INTEGER NOT NULL,
     FOREIGN KEY (type_id) REFERENCES enum_comment_types(id)
