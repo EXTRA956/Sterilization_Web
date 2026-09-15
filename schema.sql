@@ -33,3 +33,24 @@ CREATE TABLE sets (
     name TEXT NOT NULL,
     customer TEXT NOT NULL
 );
+
+CREATE TABLE set_states (
+    id INTEGER PRIMARY KEY,
+    set_id INTEGER NOT NULL,
+    FOREIGN KEY (set_id) REFERENCES sets(serial_number),
+    state_id INTEGER,
+    FOREIGN KEY (state_id) REFERENCES enum_set_state(id),
+    comment_id INTEGER,
+    FOREIGN KEY (comment_id) REFERENCES comments(id),
+    user TEXT NOT NULL,
+    date TEXT NOT NULL
+);
+
+CREATE TABLE instruments (
+    id INTEGER PRIMARY KEY,
+    set_id INTEGER NOT NULL,
+    FOREIGN KEY (set_id) REFERENCES sets(serial_number),
+    comment_id INTEGER,
+    FOREIGN KEY (comment_id) REFERENCES comments(id),
+    remaining_uses INTEGER
+);
