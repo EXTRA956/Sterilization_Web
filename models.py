@@ -35,14 +35,14 @@ class EnumPackaging(Enum):
 # Data Classes
 @dataclass(frozen = True)
 class Comment:
-	author: str
+	user: str
 	text: str
 	type : EnumCommentType
 	date: datetime = field(default_factory = datetime.now)
 
 @dataclass(frozen = True)
 class SetState:
-	author: str
+	user: str
 	state : EnumSetState
 	comment : Comment | None
 	date: datetime = field(default_factory = datetime.now)
