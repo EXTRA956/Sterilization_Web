@@ -1,5 +1,5 @@
 -- Enums
-CREATE TABLE enum_comment_types (
+CREATE TABLE enum_comment_type (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE
 );
