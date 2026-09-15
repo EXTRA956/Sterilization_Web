@@ -36,8 +36,8 @@ class EnumPackaging(Enum):
 @dataclass(frozen = True)
 class Comment:
 	author: str
-	text: str | None
-	type : EnumCommentType | None
+	text: str
+	type : EnumCommentType
 	date: datetime = field(default_factory = datetime.now)
 
 @dataclass(frozen = True)
@@ -65,13 +65,14 @@ class Instrument:
 
 @dataclass
 class Set:
+	name : str
+	customer : str
 	_serial_number : int
 	packaging : EnumPackaging
 	_active_comment : Comment
 	_instruments : list[Instrument] = field(default_factory=list)
 	_state_log : list[SetState] = field(default_factory=list)
 	
-
 	@property
 	def serial_number(self) -> int:
 		return self._serial_number
@@ -94,8 +95,12 @@ class Set:
 	def active_state(self) -> SetState:
 		return self._state_log[-1]
 
-	def add_state(self, state : SetState):
+	def add_state(self, state : SetState, clear_comment : bool):
 		self._state_log.append(state)
+
+		if clear_comment == True:
+			self._active_comment = None
+			return
 
 		if state.comment:
 			self._active_comment = state.comment
