@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS comments (
     user TEXT NOT NULL,
     date_time TEXT NOT NULL,
     type_id INTEGER NOT NULL,
-    FOREIGN KEY (type_id) REFERENCES enum_comment_types(id)
+    FOREIGN KEY (type_id) REFERENCES enum_comment_type(id)
 );
 
 CREATE TABLE IF NOT EXISTS sets (
