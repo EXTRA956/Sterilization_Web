@@ -1,11 +1,14 @@
 import sqlite3
+from datetime import datetime
 from models import EnumCommentType, EnumPackaging, EnumSetState, Comment, Instrument, Set, SetState
 
 def get_connection() -> sqlite3.Connection:
     connection = sqlite3.connect("sterilization.db")
     connection.execute("PRAGMA foreign_keys = ON")
+    connection.row_factory = sqlite3.Row
     return connection
 
+# Seeding Funcitons
 def seed_enum_table(cursor: sqlite3.Cursor, table_name: str, enum_class: EnumCommentType | EnumPackaging | EnumSetState) -> None:
     for member in enum_class:
         cursor.execute(
@@ -18,6 +21,7 @@ def seed_all_enum_tables(cursor: sqlite3.Cursor) -> None:
     seed_enum_table(cursor, "enum_packaging", EnumPackaging)
     seed_enum_table(cursor, "enum_set_state", EnumSetState)
 
+# Insert Functions
 def insert_comment(cursor: sqlite3.Cursor, comment: Comment) -> int:
     cursor.execute(
         f"INSERT INTO comments (content, user, date_time, type_id) VALUES (?, ?, ?, ?)",
@@ -81,3 +85,113 @@ def insert_set_state(cursor: sqlite3.Cursor, set_state : SetState, set_id : int)
     object.__setattr__(set_state, "data_base_id", set_state_id)
 
     return set_state_id
+
+# Get Functions
+def get_comment(cursor: sqlite3.Cursor, comment_id: int) -> Comment | None:
+    cursor.execute(
+        "SELECT user, content, type_id, date_time FROM comments WHERE id = ?",
+        (comment_id,)
+    )
+
+    data = cursor.fetchone()
+
+    if data is None:
+        return None
+
+    return Comment(
+        data_base_id=comment_id, 
+        user=data["user"], 
+        content=data["content"],
+        type=EnumCommentType(data["type_id"]), 
+        date_time=datetime.fromisoformat(data["date_time"]) 
+        )
+
+def get_instrument(cursor: sqlite3.Cursor, instrument_id: int) -> Instrument | None:
+    cursor.execute(
+        "SELECT name, remaining_uses, comment_id FROM instruments WHERE id = ?",
+        (instrument_id,)
+    )
+
+    data = cursor.fetchone()
+
+    if data is None:
+        return None
+
+    comment = None
+    if data["comment_id"]:
+         comment=get_comment(cursor, data["comment_id"])
+
+    return Instrument(
+        data_base_id=instrument_id, 
+        name=data["name"],
+        comment=comment,
+        _remaining_uses=data["remaining_uses"],
+        )
+
+def get_set_state(cursor: sqlite3.Cursor, set_state_id: int) -> SetState | None:
+    cursor.execute(
+        "SELECT user, state_id, comment_id, date_time FROM set_states WHERE id = ?",
+        (set_state_id,)
+    )
+
+    data = cursor.fetchone()
+
+    if data is None:
+        return None
+
+    comment = None
+    if data["comment_id"]:
+        comment=get_comment(cursor, data["comment_id"])
+
+    return SetState(
+        data_base_id=set_state_id,
+        user=data["user"],
+        state=EnumSetState(data["state_id"]),
+        comment=comment,
+        date_time=datetime.fromisoformat(data["date_time"])
+    )
+
+def get_set(cursor: sqlite3.Cursor, set_serial_number: int) -> Set | None:
+    cursor.execute(
+        "SELECT name, customer, packaging_id, active_comment_id FROM sets WHERE serial_number = ?",
+        (set_serial_number,)
+    )
+
+    data = cursor.fetchone()
+
+    if data is None:
+        return None
+
+    cursor.execute(
+        "SELECT id FROM instruments WHERE set_id = ?",
+        (set_serial_number,)
+    )
+
+    instrument_data = cursor.fetchall()
+    instruments = list()
+
+    if instrument_data is not None:
+        for instrument_id in instrument_data:
+                instruments.append(get_instrument(cursor, instrument_id["id"]))
+
+    cursor.execute(
+        "SELECT id FROM set_states WHERE set_id = ?",
+        (set_serial_number,)
+    )
+
+    set_state_data = cursor.fetchall()
+    set_states = list()
+
+    if set_state_data is not None:
+        for set_state_id in set_state_data:
+            set_states.append(get_set_state(cursor, set_state_id["id"]))
+
+    return Set(
+        name=data["name"],
+        customer=data["customer"],
+        _serial_number = set_serial_number,
+        packaging=EnumPackaging(data["packaging_id"]),
+        _active_comment=get_comment(cursor, data["active_comment_id"]),
+        _instruments=instruments,
+        _state_log=set_states
+    )
