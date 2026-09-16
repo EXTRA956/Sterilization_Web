@@ -1,5 +1,5 @@
 import sqlite3
-from models import EnumCommentType, EnumPackaging, EnumSetState, Comment, Instrument, Set
+from models import EnumCommentType, EnumPackaging, EnumSetState, Comment, Instrument, Set, SetState
 
 def get_connection() -> sqlite3.Connection:
     connection = sqlite3.connect("sterilization.db")
@@ -61,3 +61,23 @@ def insert_set(cursor: sqlite3.Cursor, set : Set) -> None:
         f"INSERT INTO sets (serial_number, name, customer, active_comment_id, packaging_id) VALUES (?, ?, ?, ?, ?)",
         (set.serial_number, set.name, set.customer, comment_id, set.packaging.value)
     )
+
+def insert_set_state(cursor: sqlite3.Cursor, set_state : SetState, set_id : int) -> int:
+    comment_id = None
+    if set_state.comment is not None:
+        if set_state.comment.data_base_id is None:
+            comment_id = insert_comment(cursor, set_state.comment)
+        else:
+            comment_id = set_state.comment.data_base_id
+
+    cursor.execute(
+        f"INSERT INTO set_states (user, date_time, state_id, comment_id, set_id) VALUES (?, ?, ?, ?, ?)",
+        (set_state.user, set_state.date_time.isoformat(), set_state.state.value, comment_id, set_id)
+    )
+
+    set_state_id = cursor.lastrowid
+
+     # Intentional bypass of frozen=true. data_base_id is ease of use only, doesnt need immutability for an audit.
+    object.__setattr__(set_state, "data_base_id", set_state_id)
+
+    return set_state_id

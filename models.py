@@ -43,6 +43,7 @@ class Comment:
 
 @dataclass(frozen = True)
 class SetState:
+	data_base_id : int | None
 	user: str
 	state : EnumSetState
 	comment : Comment | None
