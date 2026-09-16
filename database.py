@@ -1,5 +1,5 @@
 import sqlite3
-from models import EnumCommentType, EnumPackaging, EnumSetState, Comment, Instrument
+from models import EnumCommentType, EnumPackaging, EnumSetState, Comment, Instrument, Set
 
 def get_connection() -> sqlite3.Connection:
     connection = sqlite3.connect("sterilization.db")
@@ -20,7 +20,7 @@ def seed_all_enum_tables(cursor: sqlite3.Cursor) -> None:
 
 def insert_comment(cursor: sqlite3.Cursor, comment: Comment) -> int:
     cursor.execute(
-        f"INSERT INTO comments (content, user, date_time, type_id) VALUES (?, ?, ?, ?)"
+        f"INSERT INTO comments (content, user, date_time, type_id) VALUES (?, ?, ?, ?)",
         (comment.content, comment.user, comment.date_time.isoformat(), comment.type.value)
     )
 
@@ -34,8 +34,11 @@ def insert_comment(cursor: sqlite3.Cursor, comment: Comment) -> int:
 def insert_instrument(cursor: sqlite3.Cursor, instrument: Instrument, set_id : int) -> int:
     comment_id = None
     if instrument.comment is not None:
-        comment_id = insert_comment(cursor, instrument.comment)
-
+        if instrument.comment.data_base_id is None:
+            comment_id = insert_comment(cursor, instrument.comment)
+        else:
+            comment_id = instrument.comment.data_base_id
+       
     cursor.execute(
         f"INSERT INTO instruments (name, remaining_uses, set_id, comment_id) VALUES (?, ?, ?, ?)",
         (instrument.name, instrument.remaining_uses, set_id, comment_id)
@@ -45,3 +48,16 @@ def insert_instrument(cursor: sqlite3.Cursor, instrument: Instrument, set_id : i
     instrument.data_base_id = instrument_id
     
     return instrument_id
+
+def insert_set(cursor: sqlite3.Cursor, set : Set) -> None:
+    comment_id = None
+    if set.active_comment is not None:
+        if set.active_comment.data_base_id is None:
+            comment_id = insert_comment(cursor, set.comment)
+        else:
+            comment_id = set.active_comment.data_base_id
+
+    cursor.execute(
+        f"INSERT INTO sets (serial_number, name, customer, active_comment_id, packaging_id) VALUES (?, ?, ?, ?, ?)",
+        (set.serial_number, set.name, set.customer, comment_id, set.packaging.value)
+    )

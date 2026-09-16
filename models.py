@@ -35,7 +35,7 @@ class EnumPackaging(Enum):
 # Data Classes
 @dataclass(frozen = True)
 class Comment:
-	data_base_id: int
+	data_base_id: int | None
 	user: str
 	content: str
 	type : EnumCommentType
@@ -50,7 +50,7 @@ class SetState:
 
 @dataclass
 class Instrument:
-	data_base_id: int
+	data_base_id: int | None
 	name : str
 	comment : Comment | None
 	_remaining_uses: int | None
