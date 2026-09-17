@@ -24,11 +24,10 @@ def login():
         user_id = request.form.get("user_id")
         password = request.form.get("password")
 
-        if (re.match(r"^ID_\d{3}$", user_id)) or (password != os.getenv("ADMIN_PASSWORD")): # Temporary to get the page working, (Profiles with hash passwords will be added later)
+        if (not re.match(r"^ID_\d{3}$", user_id)) or (password != os.getenv("ADMIN_PASSWORD")): # Temporary to get the page working, (Profiles with hash passwords will be added later)
             return render_template("login.html", error="Invalid ID format or incorrect password")
 
         session["user_id"] = user_id
-        
         return redirect("/home")
 
     session.clear()

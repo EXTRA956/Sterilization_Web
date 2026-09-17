@@ -9,9 +9,17 @@
     <body>
         <h1>Login</h1>
         <form method="post">
+            {% if error %}
+                <p style="color: red;">{{ error }}</p>
+            {% endif %}
+
             <label>
                 ID (format: ID_XXX):
                 <input type="text" id="user_id", name="user_id">
+            </label>
+             <label>
+                Password:
+                <input type="text" id="password", name="password">
             </label>
             <button type="submit">login</button>
         </form>
