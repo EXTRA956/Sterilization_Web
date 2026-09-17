@@ -1,0 +1,44 @@
+body {
+    font-family: system-ui, sans-serif;
+    background-color: cornflowerblue;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+form {
+    background-color: aliceblue;
+    padding: 2rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 300px;
+}
+
+input {
+    padding: 0.5rem;
+    border-radius: 4px;
+    background-color: rgb(189, 196, 202);
+    border: none;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+button {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: none;
+    background-color: rgb(163, 227, 255);
+    color: #0f172a;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+h1 {
+    font-size: 3rem;
+    color: white;
+}

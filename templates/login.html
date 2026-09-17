@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <title>
+            Sterilization Tracker
+        </title>
+    </head>
+    <body>
+        <h1>Login</h1>
+        <form method="post">
+            <label>
+                ID (format: ID_XXX):
+                <input type="text" id="user_id", name="user_id">
+            </label>
+            <button type="submit">login</button>
+        </form>
+    </body>
+</html>
