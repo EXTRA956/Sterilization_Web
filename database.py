@@ -1,6 +1,6 @@
 import sqlite3
 from datetime import datetime
-from models import EnumCommentType, EnumPackaging, EnumSetState, Comment, Instrument, Set, SetState
+from models import EnumNoteType, EnumPackaging, EnumSetState, Comment, Instrument, Set, SetState
 
 def get_connection() -> sqlite3.Connection:
     connection = sqlite3.connect("sterilization.db")
@@ -9,7 +9,7 @@ def get_connection() -> sqlite3.Connection:
     return connection
 
 # Seeding Funcitons
-def seed_enum_table(cursor: sqlite3.Cursor, table_name: str, enum_class: EnumCommentType | EnumPackaging | EnumSetState) -> None:
+def seed_enum_table(cursor: sqlite3.Cursor, table_name: str, enum_class: EnumNoteType | EnumPackaging | EnumSetState) -> None:
     for member in enum_class:
         cursor.execute(
             f"INSERT OR IGNORE INTO {table_name} (id, name) VALUES (?, ?)", 
@@ -17,15 +17,15 @@ def seed_enum_table(cursor: sqlite3.Cursor, table_name: str, enum_class: EnumCom
         )
 
 def seed_all_enum_tables(cursor: sqlite3.Cursor) -> None:
-    seed_enum_table(cursor, "enum_comment_type", EnumCommentType)
+    seed_enum_table(cursor, "enum_note_type", EnumNoteType)
     seed_enum_table(cursor, "enum_packaging", EnumPackaging)
     seed_enum_table(cursor, "enum_set_state", EnumSetState)
 
 # Insert Functions
 def insert_comment(cursor: sqlite3.Cursor, comment: Comment) -> int:
     cursor.execute(
-        f"INSERT INTO comments (content, user, date_time, type_id) VALUES (?, ?, ?, ?)",
-        (comment.content, comment.user, comment.date_time.isoformat(), comment.type.value)
+        f"INSERT INTO comments (content, user, date_time) VALUES (?, ?, ?)",
+        (comment.content, comment.user, comment.date_time.isoformat())
     )
 
     comment_id = cursor.lastrowid
@@ -36,16 +36,13 @@ def insert_comment(cursor: sqlite3.Cursor, comment: Comment) -> int:
     return comment_id
 
 def insert_instrument(cursor: sqlite3.Cursor, instrument: Instrument, set_id : int) -> int:
-    comment_id = None
-    if instrument.comment is not None:
-        if instrument.comment.data_base_id is None:
-            comment_id = insert_comment(cursor, instrument.comment)
-        else:
-            comment_id = instrument.comment.data_base_id
-       
+    note_type_id = None
+    if instrument.note_type is not None:
+        note_type_id = instrument.note_type.value
+
     cursor.execute(
-        f"INSERT INTO instruments (name, remaining_uses, set_id, comment_id) VALUES (?, ?, ?, ?)",
-        (instrument.name, instrument.remaining_uses, set_id, comment_id)
+        f"INSERT INTO instruments (name, remaining_uses, note_content, set_id, note_type_id) VALUES (?, ?, ?, ?, ?)",
+        (instrument.name, instrument.remaining_uses,  instrument.note_content, set_id, note_type_id)
     )
 
     instrument_id = cursor.lastrowid
@@ -89,7 +86,7 @@ def insert_set_state(cursor: sqlite3.Cursor, set_state : SetState, set_id : int)
 # Get Functions
 def get_comment(cursor: sqlite3.Cursor, comment_id: int) -> Comment | None:
     cursor.execute(
-        "SELECT user, content, type_id, date_time FROM comments WHERE id = ?",
+        "SELECT user, content, date_time FROM comments WHERE id = ?",
         (comment_id,)
     )
 
@@ -102,13 +99,12 @@ def get_comment(cursor: sqlite3.Cursor, comment_id: int) -> Comment | None:
         data_base_id=comment_id, 
         user=data["user"], 
         content=data["content"],
-        type=EnumCommentType(data["type_id"]), 
         date_time=datetime.fromisoformat(data["date_time"]) 
         )
 
 def get_instrument(cursor: sqlite3.Cursor, instrument_id: int) -> Instrument | None:
     cursor.execute(
-        "SELECT name, remaining_uses, comment_id FROM instruments WHERE id = ?",
+        "SELECT name, remaining_uses, note_content, note_type_id FROM instruments WHERE id = ?",
         (instrument_id,)
     )
 
@@ -117,15 +113,16 @@ def get_instrument(cursor: sqlite3.Cursor, instrument_id: int) -> Instrument | N
     if data is None:
         return None
 
-    comment = None
-    if data["comment_id"]:
-         comment=get_comment(cursor, data["comment_id"])
+    note_type = None
+    if data["note_type_id"] is not None:
+        note_type = EnumNoteType(data["note_type_id"])
 
     return Instrument(
         data_base_id=instrument_id, 
         name=data["name"],
-        comment=comment,
-        _remaining_uses=data["remaining_uses"],
+        note_type=note_type,
+        note_content=data["note_content"],
+        _remaining_uses=data["remaining_uses"]
         )
 
 def get_set_state(cursor: sqlite3.Cursor, set_state_id: int) -> SetState | None:

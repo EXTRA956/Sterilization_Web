@@ -1,5 +1,5 @@
 -- Enums
-CREATE TABLE IF NOT EXISTS enum_comment_type (
+CREATE TABLE IF NOT EXISTS enum_note_type (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE
 );
@@ -19,9 +19,7 @@ CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY,
     content TEXT NOT NULL,
     user TEXT NOT NULL,
-    date_time TEXT NOT NULL,
-    type_id INTEGER NOT NULL,
-    FOREIGN KEY (type_id) REFERENCES enum_comment_type(id)
+    date_time TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS sets (
@@ -50,8 +48,9 @@ CREATE TABLE IF NOT EXISTS instruments (
     id INTEGER PRIMARY KEY,
     name TEXT,
     remaining_uses INTEGER,
+    note_content TEXT,
     set_id INTEGER NOT NULL,
-    comment_id INTEGER,
+    note_type_id INTEGER,
     FOREIGN KEY (set_id) REFERENCES sets(serial_number),
-    FOREIGN KEY (comment_id) REFERENCES comments(id)
+    FOREIGN KEY (note_type_id) REFERENCES enum_note_type(id)
 );

@@ -19,7 +19,7 @@ class EnumSetState(Enum):
 	DIRTY = auto()
 	INVALIDATED = auto()
 
-class EnumCommentType(Enum):
+class EnumNoteType(Enum):
 	DAMAGED = auto()
 	MISSING = auto()
 	EXTRA = auto()
@@ -38,7 +38,6 @@ class Comment:
 	data_base_id: int | None
 	user: str
 	content: str
-	type : EnumCommentType
 	date_time: datetime = field(default_factory = datetime.now)
 
 @dataclass(frozen = True)
@@ -53,7 +52,8 @@ class SetState:
 class Instrument:
 	data_base_id: int | None
 	name : str
-	comment : Comment | None
+	note_type : EnumNoteType | None
+	note_content : str | None
 	_remaining_uses: int | None
 	
 	@property
